@@ -35,7 +35,7 @@ class MiniQMTConnector:
         # Arrow schema定义
         self.arrow_schema = pa.schema([
             pa.field("symbol", pa.string()),
-            pa.field("timestamp", pa.timestamp('ms')),
+            pa.field("timestamp", pa.timestamp('ns')),
             pa.field("open", pa.float64()),
             pa.field("high", pa.float64()),
             pa.field("low", pa.float64()),
