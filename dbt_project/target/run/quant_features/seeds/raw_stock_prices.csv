@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "quant_features"."main"."raw_stock_prices" ("date" date,"symbol" text,"open" DECIMAL(10,2),"high" DECIMAL(10,2),"low" DECIMAL(10,2),"close" DECIMAL(10,2),"volume" BIGINT)
+  ;
+    -- dbt seed --
+    
+          COPY "quant_features"."main"."raw_stock_prices" FROM '/workspace/dbt_project/seeds/raw_stock_prices.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  

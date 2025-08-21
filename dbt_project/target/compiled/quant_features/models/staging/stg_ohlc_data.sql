@@ -1,4 +1,4 @@
-{{ config(materialized='view') }}
+
 
 with raw_ohlc as (
     select 
@@ -16,7 +16,7 @@ with raw_ohlc as (
             when low > least(open, close, high) then null
             else date
         end as valid_timestamp
-    from {{ ref('raw_stock_prices') }}
+    from "quant_features"."main"."raw_stock_prices"
 ),
 
 cleaned_ohlc as (
@@ -35,8 +35,8 @@ cleaned_ohlc as (
         case when close != 0 then volume / close else 0 end as volume_price_ratio
     from raw_ohlc
     where valid_timestamp is not null
-      and timestamp >= '{{ var("start_date") }}'
-      and timestamp <= '{{ var("end_date") }}'
+      and timestamp >= '2020-01-01'
+      and timestamp <= '2024-12-31'
 )
 
 select * from cleaned_ohlc
