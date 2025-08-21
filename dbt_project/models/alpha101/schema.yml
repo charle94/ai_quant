@@ -1,0 +1,181 @@
+version: 2
+
+models:
+  - name: alpha_base_data
+    description: "Alpha 101因子计算的基础数据"
+    columns:
+      - name: symbol
+        description: "交易对"
+        tests:
+          - not_null
+      - name: timestamp
+        description: "时间戳"
+        tests:
+          - not_null
+      - name: close
+        description: "收盘价"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+      - name: volume
+        description: "成交量"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+      - name: returns
+        description: "收益率"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: -1
+              max_value: 10
+      - name: vwap
+        description: "成交量加权平均价格"
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              min_value: 0
+
+  - name: alpha_factors_001_020
+    description: "Alpha 101因子 (001-020)"
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      - name: timestamp
+        tests:
+          - not_null
+      - name: alpha001
+        description: "Alpha001因子: 基于价格反转的动量因子"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: -5
+              max_value: 5
+              severity: warn
+      - name: alpha003
+        description: "Alpha003因子: 开盘价与成交量负相关"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: -2
+              max_value: 2
+              severity: warn
+      - name: alpha006
+        description: "Alpha006因子: 开盘价与成交量相关性"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: -2
+              max_value: 2
+              severity: warn
+
+  - name: alpha_factors_021_050
+    description: "Alpha 101因子 (021-050)"
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      - name: timestamp
+        tests:
+          - not_null
+      - name: alpha025
+        description: "Alpha025因子: 成交量价格综合因子"
+      - name: alpha028
+        description: "Alpha028因子: 标准化的价格趋势因子"
+      - name: alpha041
+        description: "Alpha041因子: 几何平均价格偏离"
+
+  - name: alpha_factors_advanced
+    description: "高级Alpha因子"
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      - name: timestamp
+        tests:
+          - not_null
+      - name: momentum_reversal_norm
+        description: "标准化动量反转因子"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: -3
+              max_value: 3
+              severity: warn
+      - name: volume_price_divergence_norm
+        description: "标准化量价背离因子"
+      - name: ma_trend_norm
+        description: "标准化移动平均趋势因子"
+
+  - name: alpha_factors_final
+    description: "最终Alpha因子汇总"
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      - name: timestamp
+        tests:
+          - not_null
+      - name: entity_id
+        description: "Feast实体ID"
+        tests:
+          - not_null
+          - unique
+      - name: event_timestamp
+        description: "事件时间戳"
+        tests:
+          - not_null
+      - name: momentum_composite
+        description: "动量组合因子"
+        tests:
+          - dbt_utils.accepted_range:
+              min_value: -2
+              max_value: 2
+              severity: warn
+      - name: reversal_composite
+        description: "反转组合因子"
+      - name: volume_composite
+        description: "成交量组合因子"
+      - name: market_regime
+        description: "市场状态"
+        tests:
+          - accepted_values:
+              values: ['TRENDING', 'MEAN_REVERTING', 'SIDEWAYS']
+      - name: volatility_regime
+        description: "波动率状态"
+        tests:
+          - accepted_values:
+              values: ['HIGH_VOL', 'LOW_VOL', 'NORMAL_VOL']
+
+# 自定义测试
+tests:
+  - name: test_alpha_factors_not_all_null
+    description: "确保Alpha因子不全为空值"
+    sql: |
+      SELECT symbol, timestamp
+      FROM {{ ref('alpha_factors_final') }}
+      WHERE alpha001 IS NULL 
+        AND alpha003 IS NULL 
+        AND alpha006 IS NULL
+        AND momentum_composite IS NULL
+    
+  - name: test_alpha_factors_reasonable_range
+    description: "检查Alpha因子值在合理范围内"
+    sql: |
+      SELECT symbol, timestamp, alpha001
+      FROM {{ ref('alpha_factors_final') }}
+      WHERE ABS(alpha001) > 10
+    
+  - name: test_market_regime_consistency
+    description: "检查市场状态的一致性"
+    sql: |
+      SELECT symbol, timestamp, market_regime, volatility_regime
+      FROM {{ ref('alpha_factors_final') }}
+      WHERE market_regime NOT IN ('TRENDING', 'MEAN_REVERTING', 'SIDEWAYS')
+         OR volatility_regime NOT IN ('HIGH_VOL', 'LOW_VOL', 'NORMAL_VOL')
+    
+  - name: test_composite_factors_calculation
+    description: "验证组合因子计算正确性"
+    sql: |
+      SELECT symbol, timestamp
+      FROM {{ ref('alpha_factors_final') }}
+      WHERE momentum_composite IS NOT NULL
+        AND ABS(momentum_composite) > 5  -- 组合因子不应过大
