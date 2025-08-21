@@ -1,0 +1,145 @@
+{
+  "ruleChain": {
+    "id": "trading_strategy_chain",
+    "name": "量化交易策略规则链",
+    "root": true,
+    "debugMode": false
+  },
+  "metadata": {
+    "nodes": [
+      {
+        "id": "feature_input",
+        "type": "jsFilter",
+        "name": "特征数据输入",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "return msg.trading_pair && msg.price > 0;"
+        }
+      },
+      {
+        "id": "trend_analysis",
+        "type": "jsFilter", 
+        "name": "趋势分析",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "var uptrend = msg.price > msg.ma_5 && msg.ma_5 > msg.ma_10; var downtrend = msg.price < msg.ma_5 && msg.ma_5 < msg.ma_10; msg.trend = uptrend ? 'UP' : (downtrend ? 'DOWN' : 'SIDEWAYS'); return true;"
+        }
+      },
+      {
+        "id": "momentum_check",
+        "type": "jsFilter",
+        "name": "动量检查", 
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "msg.momentum_signal = msg.momentum_5d > 0.005 ? 'STRONG_UP' : (msg.momentum_5d < -0.005 ? 'STRONG_DOWN' : 'WEAK'); return true;"
+        }
+      },
+      {
+        "id": "rsi_overbought_check",
+        "type": "jsSwitch",
+        "name": "RSI超买检查",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "return msg.rsi_14 > 70 ? 'overbought' : (msg.rsi_14 < 30 ? 'oversold' : 'normal');"
+        }
+      },
+      {
+        "id": "volume_analysis",
+        "type": "jsFilter",
+        "name": "成交量分析",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "msg.volume_signal = msg.volume_ratio > 1.5 ? 'HIGH' : (msg.volume_ratio < 0.5 ? 'LOW' : 'NORMAL'); return true;"
+        }
+      },
+      {
+        "id": "buy_signal_generator",
+        "type": "jsTransform",
+        "name": "买入信号生成器",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "var buyScore = 0; if (msg.trend === 'UP') buyScore += 3; if (msg.momentum_signal === 'STRONG_UP') buyScore += 2; if (msg.rsi_14 < 30) buyScore += 2; if (msg.volume_signal === 'HIGH') buyScore += 1; if (msg.price > msg.ma_5) buyScore += 1; msg.buy_score = buyScore; msg.signal = buyScore >= 5 ? 'BUY' : 'HOLD'; return {msg: msg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "id": "sell_signal_generator", 
+        "type": "jsTransform",
+        "name": "卖出信号生成器",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "var sellScore = 0; if (msg.trend === 'DOWN') sellScore += 3; if (msg.momentum_signal === 'STRONG_DOWN') sellScore += 2; if (msg.rsi_14 > 70) sellScore += 2; if (msg.volume_signal === 'HIGH') sellScore += 1; if (msg.price < msg.ma_5) sellScore += 1; msg.sell_score = sellScore; if (sellScore >= 5) msg.signal = 'SELL'; return {msg: msg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "id": "risk_management",
+        "type": "jsFilter",
+        "name": "风险管理",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "if (msg.volatility > 0.05) { msg.risk_level = 'HIGH'; msg.position_size = 0.5; } else if (msg.volatility > 0.03) { msg.risk_level = 'MEDIUM'; msg.position_size = 0.7; } else { msg.risk_level = 'LOW'; msg.position_size = 1.0; } return true;"
+        }
+      },
+      {
+        "id": "signal_output",
+        "type": "jsTransform",
+        "name": "信号输出",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "var output = { trading_pair: msg.trading_pair, signal: msg.signal || 'HOLD', price: msg.price, buy_score: msg.buy_score || 0, sell_score: msg.sell_score || 0, trend: msg.trend, momentum_signal: msg.momentum_signal, volume_signal: msg.volume_signal, risk_level: msg.risk_level, position_size: msg.position_size, timestamp: new Date().toISOString(), features: { rsi_14: msg.rsi_14, ma_5: msg.ma_5, ma_10: msg.ma_10, volatility: msg.volatility, volume_ratio: msg.volume_ratio, momentum_5d: msg.momentum_5d } }; return {msg: output, metadata: metadata, msgType: 'TRADING_SIGNAL'};"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromId": "feature_input",
+        "toId": "trend_analysis",
+        "type": "True"
+      },
+      {
+        "fromId": "trend_analysis", 
+        "toId": "momentum_check",
+        "type": "True"
+      },
+      {
+        "fromId": "momentum_check",
+        "toId": "rsi_overbought_check", 
+        "type": "True"
+      },
+      {
+        "fromId": "rsi_overbought_check",
+        "toId": "volume_analysis",
+        "type": "overbought"
+      },
+      {
+        "fromId": "rsi_overbought_check",
+        "toId": "volume_analysis",
+        "type": "oversold"
+      },
+      {
+        "fromId": "rsi_overbought_check", 
+        "toId": "volume_analysis",
+        "type": "normal"
+      },
+      {
+        "fromId": "volume_analysis",
+        "toId": "buy_signal_generator",
+        "type": "True"
+      },
+      {
+        "fromId": "buy_signal_generator",
+        "toId": "sell_signal_generator",
+        "type": "Success"
+      },
+      {
+        "fromId": "sell_signal_generator",
+        "toId": "risk_management",
+        "type": "Success"
+      },
+      {
+        "fromId": "risk_management",
+        "toId": "signal_output",
+        "type": "True"
+      }
+    ]
+  }
+}

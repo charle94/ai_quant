@@ -1,0 +1,13 @@
+quant_features:
+  outputs:
+    dev:
+      type: duckdb
+      path: '/workspace/data/quant_features.duckdb'
+      schema: main
+      threads: 4
+    prod:
+      type: duckdb
+      path: '/workspace/data/quant_features_prod.duckdb'
+      schema: main
+      threads: 8
+  target: dev

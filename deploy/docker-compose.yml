@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  # Redis - Feast在线存储
+  redis:
+    image: redis:7-alpine
+    container_name: quant-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  # Feast Feature Server
+  feast-server:
+    image: feastdev/feature-server:latest
+    container_name: quant-feast-server
+    ports:
+      - "6566:6566"
+    volumes:
+      - ./feast_config/feature_repo:/feature_repo
+      - ../data:/data
+    environment:
+      - FEAST_USAGE=False
+    command: feast serve --host 0.0.0.0 --port 6566
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+  # 量化决策引擎
+  decision-engine:
+    build:
+      context: ../decision_engine
+      dockerfile: Dockerfile
+    container_name: quant-decision-engine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../config:/workspace/config
+      - ../decision_engine/rules:/workspace/decision_engine/rules
+      - ../data:/workspace/data
+    environment:
+      - CONFIG_FILE=/workspace/config/rulego.yml
+    depends_on:
+      - feast-server
+    restart: unless-stopped
+
+  # 实时数据处理服务
+  realtime-processor:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.python
+    container_name: quant-realtime-processor
+    volumes:
+      - ../realtime_processing:/app/realtime_processing
+      - ../config:/app/config
+      - ../data:/app/data
+    environment:
+      - PYTHONPATH=/app
+    command: python realtime_processing/main.py
+    depends_on:
+      - feast-server
+    restart: unless-stopped
+
+  # 数据库初始化服务
+  db-init:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.python
+    container_name: quant-db-init
+    volumes:
+      - ../scripts:/app/scripts
+      - ../config:/app/config
+      - ../data:/app/data
+    environment:
+      - PYTHONPATH=/app
+    command: python scripts/init_duckdb.py
+    restart: "no"
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  default:
+    name: quant-network

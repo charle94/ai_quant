@@ -1,0 +1,72 @@
+version: 2
+
+sources:
+  - name: raw
+    description: "Raw OHLC data source"
+    tables:
+      - name: ohlc_data
+        description: "Raw OHLC price and volume data"
+        columns:
+          - name: symbol
+            description: "Stock/crypto symbol"
+            tests:
+              - not_null
+          - name: timestamp
+            description: "Timestamp of the data point"
+            tests:
+              - not_null
+          - name: open
+            description: "Opening price"
+          - name: high
+            description: "Highest price"
+          - name: low
+            description: "Lowest price"
+          - name: close
+            description: "Closing price"
+          - name: volume
+            description: "Trading volume"
+
+models:
+  - name: stg_ohlc_data
+    description: "Staged and cleaned OHLC data"
+    columns:
+      - name: symbol
+        description: "Stock/crypto symbol"
+        tests:
+          - not_null
+      - name: timestamp
+        description: "Timestamp of the data point"
+        tests:
+          - not_null
+      - name: daily_return
+        description: "Daily return percentage"
+
+  - name: mart_technical_indicators
+    description: "Technical indicators calculated from OHLC data"
+    columns:
+      - name: symbol
+        tests:
+          - not_null
+      - name: timestamp
+        tests:
+          - not_null
+      - name: rsi_14
+        description: "14-period RSI"
+        tests:
+          - accepted_values:
+              values: [0, 100]
+              quote: false
+              severity: warn
+
+  - name: features_ohlc_technical
+    description: "Engineered features for ML models"
+    columns:
+      - name: entity_id
+        description: "Unique identifier for Feast"
+        tests:
+          - not_null
+          - unique
+      - name: event_timestamp
+        description: "Event timestamp for Feast"
+        tests:
+          - not_null
