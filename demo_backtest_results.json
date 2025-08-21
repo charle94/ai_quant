@@ -1,0 +1,39 @@
+{
+  "backtest_result": {
+    "start_date": "2025-08-14T15:12:33.366523",
+    "end_date": "2025-08-20T15:12:33.366539",
+    "initial_capital": 100000,
+    "final_capital": 150293.58360923018,
+    "total_return": 0.5029358360923017,
+    "total_trades": 14,
+    "winning_trades": 14,
+    "losing_trades": 0,
+    "win_rate": 1.0,
+    "max_drawdown": 0.11219415390096424
+  },
+  "signal_stats": {
+    "total_signals": 74,
+    "processed_signals": 74,
+    "buy_signals": 10,
+    "sell_signals": 18,
+    "hold_signals": 46,
+    "buy_ratio": 0.13513513513513514,
+    "sell_ratio": 0.24324324324324326
+  },
+  "positions": [
+    {
+      "symbol": "BTCUSDT",
+      "quantity": -0.3312906538753772,
+      "avg_price": 42070.07020029842,
+      "unrealized_pnl": -1084.4398656949365,
+      "realized_pnl": 1099.610798890162
+    },
+    {
+      "symbol": "ETHUSDT",
+      "quantity": -0.2949633812970075,
+      "avg_price": 38839.476969846815,
+      "unrealized_pnl": -1919.670821648344,
+      "realized_pnl": 709.8828886557442
+    }
+  ]
+}
