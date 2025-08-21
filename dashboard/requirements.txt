@@ -1,0 +1,5 @@
+# Dashboard dependencies
+streamlit==1.28.2
+plotly==5.17.0
+pandas==2.1.4
+numpy==1.24.4

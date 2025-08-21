@@ -1,0 +1,36 @@
+kind: rill.runtime.v1.Dashboard
+metadata:
+  name: quant-performance-overview
+spec:
+  available_time_ranges:
+  - label: 最近7天
+    range: P7D
+  - label: 最近30天
+    range: P30D
+  - label: 最近90天
+    range: P90D
+  default_time_range: P30D
+  dimensions:
+  - expression: date
+    label: 日期
+    name: date
+  measures:
+  - expression: portfolio_value
+    format_preset: currency_usd
+    label: 组合价值
+    name: portfolio_value
+  - expression: daily_return
+    format_preset: percentage_2
+    label: 日收益率
+    name: daily_return
+  - expression: cumulative_return
+    format_preset: percentage_2
+    label: 累计收益率
+    name: cumulative_return
+  - expression: rolling_sharpe_30d
+    format_preset: number_2
+    label: 30日滚动夏普比率
+    name: rolling_sharpe_30d
+  model: daily_returns
+  time_column: date
+  title: 量化策略绩效概览

@@ -1,0 +1,134 @@
+{
+  "alpha101_factors": {
+    "basic_factors": [
+      "alpha001",
+      "alpha002",
+      "alpha003",
+      "alpha004",
+      "alpha005",
+      "alpha006",
+      "alpha007",
+      "alpha008",
+      "alpha009",
+      "alpha010",
+      "alpha011",
+      "alpha012",
+      "alpha013",
+      "alpha014",
+      "alpha015",
+      "alpha016",
+      "alpha017",
+      "alpha018",
+      "alpha019",
+      "alpha020",
+      "alpha021",
+      "alpha022",
+      "alpha023",
+      "alpha024",
+      "alpha025",
+      "alpha026",
+      "alpha027",
+      "alpha028",
+      "alpha029",
+      "alpha030",
+      "alpha031",
+      "alpha032",
+      "alpha033",
+      "alpha034",
+      "alpha035",
+      "alpha036",
+      "alpha037",
+      "alpha038",
+      "alpha039",
+      "alpha040",
+      "alpha041",
+      "alpha042",
+      "alpha043",
+      "alpha044",
+      "alpha045",
+      "alpha046",
+      "alpha047",
+      "alpha048",
+      "alpha049",
+      "alpha050"
+    ],
+    "advanced_factors": [
+      "momentum_reversal_norm",
+      "short_momentum_norm",
+      "medium_momentum_norm",
+      "volume_price_divergence_norm",
+      "volatility_rank_norm",
+      "ma_trend_norm",
+      "bollinger_position_norm",
+      "opening_gap_norm",
+      "sentiment_volume_norm"
+    ],
+    "composite_factors": [
+      "momentum_composite",
+      "reversal_composite",
+      "volume_composite",
+      "volatility_composite",
+      "trend_composite"
+    ],
+    "realtime_factors": [
+      "alpha001_rt",
+      "alpha003_rt",
+      "alpha006_rt",
+      "alpha012_rt",
+      "momentum_composite_rt",
+      "reversal_composite_rt",
+      "volume_composite_rt"
+    ]
+  },
+  "factor_categories": {
+    "momentum": [
+      "alpha001",
+      "alpha012",
+      "short_momentum_norm",
+      "momentum_composite"
+    ],
+    "reversal": [
+      "alpha003",
+      "alpha004",
+      "momentum_reversal_norm",
+      "reversal_composite"
+    ],
+    "volume": [
+      "alpha006",
+      "alpha025",
+      "volume_price_confirmation_norm",
+      "volume_composite"
+    ],
+    "volatility": [
+      "alpha022",
+      "alpha040",
+      "price_volatility_norm",
+      "volatility_composite"
+    ],
+    "trend": [
+      "alpha005",
+      "alpha028",
+      "ma_trend_norm",
+      "trend_composite"
+    ]
+  },
+  "market_regimes": {
+    "trending": [
+      "TRENDING_UP",
+      "TRENDING_DOWN"
+    ],
+    "mean_reverting": [
+      "SIDEWAYS"
+    ],
+    "volatility": [
+      "HIGH_VOL",
+      "LOW_VOL",
+      "NORMAL_VOL"
+    ],
+    "volume": [
+      "HIGH_VOLUME",
+      "LOW_VOLUME",
+      "NORMAL_VOLUME"
+    ]
+  }
+}
