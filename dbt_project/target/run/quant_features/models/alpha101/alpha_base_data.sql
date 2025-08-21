@@ -31,8 +31,8 @@ WITH base_ohlc AS (
             ELSE 0
         END AS returns
     FROM "quant_features"."main"."stg_ohlc_data"
-    WHERE timestamp >= '2020-01-01'
-      AND timestamp <= '2024-12-31'
+    WHERE timestamp >= CAST('2020-01-01' AS DATE)
+      AND timestamp <= CAST('2024-12-31' AS DATE)
 ),
 
 enhanced_data AS (
@@ -471,15 +471,15 @@ enhanced_data AS (
  AS cov_high_volume_5
         
     FROM base_ohlc
-    WHERE timestamp >= '2020-01-01' - INTERVAL '250 days'  -- 扩展时间范围以确保有足够的历史数据
+    WHERE timestamp >= CAST(CAST('2020-01-01' AS DATE) AS DATE) - INTERVAL '250 days'  -- 扩展时间范围以确保有足够的历史数据
 ),
 
 -- 过滤回原始时间范围
 final_data AS (
     SELECT *
     FROM enhanced_data
-    WHERE timestamp >= '2020-01-01'
-      AND timestamp <= '2024-12-31'
+    WHERE timestamp >= CAST('2020-01-01' AS DATE)
+      AND timestamp <= CAST('2024-12-31' AS DATE)
 )
 
 SELECT * FROM final_data
