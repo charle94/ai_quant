@@ -1,0 +1,13 @@
+
+    
+    
+    
+    create table "quant_features"."main"."market_data" ("date" date,"symbol" text,"market_cap" BIGINT,"pe_ratio" DECIMAL(10,2),"dividend_yield" DECIMAL(5,2),"sector" text)
+  ;
+    -- dbt seed --
+    
+          COPY "quant_features"."main"."market_data" FROM '/workspace/dbt_project/seeds/market_data.csv' (FORMAT CSV, HEADER TRUE, DELIMITER ',')
+        
+
+;
+  

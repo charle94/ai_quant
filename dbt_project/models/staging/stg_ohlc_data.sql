@@ -3,7 +3,7 @@
 with raw_ohlc as (
     select 
         symbol,
-        timestamp,
+        date as timestamp,
         open,
         high,
         low,
@@ -14,9 +14,9 @@ with raw_ohlc as (
             when open <= 0 or high <= 0 or low <= 0 or close <= 0 then null
             when high < greatest(open, close, low) then null
             when low > least(open, close, high) then null
-            else timestamp
+            else date
         end as valid_timestamp
-    from {{ source('raw', 'ohlc_data') }}
+    from {{ ref('raw_stock_prices') }}
 ),
 
 cleaned_ohlc as (

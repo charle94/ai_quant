@@ -1,0 +1,36 @@
+version: 2
+
+seeds:
+  - name: raw_stock_prices
+    description: "Raw stock price data"
+    columns:
+      - name: date
+        data_type: date
+      - name: symbol
+        data_type: varchar
+      - name: open
+        data_type: decimal(10,2)
+      - name: high
+        data_type: decimal(10,2)
+      - name: low
+        data_type: decimal(10,2)
+      - name: close
+        data_type: decimal(10,2)
+      - name: volume
+        data_type: bigint
+
+  - name: market_data
+    description: "Market data including fundamentals"
+    columns:
+      - name: date
+        data_type: date
+      - name: symbol
+        data_type: varchar
+      - name: market_cap
+        data_type: bigint
+      - name: pe_ratio
+        data_type: decimal(10,2)
+      - name: dividend_yield
+        data_type: decimal(5,2)
+      - name: sector
+        data_type: varchar
