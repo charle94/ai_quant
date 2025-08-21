@@ -22,20 +22,15 @@ intermediate_calcs AS (
         *,
         -- Alpha001 相关计算
         
-    -- 使用ROW_NUMBER()来找到最大值的位置
-    (5 - 1) - (
-        ROW_NUMBER() OVER (
-            PARTITION BY symbol, 
-            (CASE WHEN returns < 0 THEN returns_std20 ELSE close END = 
-    MAX(CASE WHEN returns < 0 THEN returns_std20 ELSE close END) OVER (
-        PARTITION BY symbol 
-        ORDER BY timestamp
-        ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
-    )
-)
-            ORDER BY timestamp DESC
-        ) - 1
-    )
+    CASE 
+        WHEN CASE WHEN returns < 0 THEN returns_std20 ELSE close END = MAX(CASE WHEN returns < 0 THEN returns_std20 ELSE close END) OVER (
+            PARTITION BY symbol 
+            ORDER BY timestamp
+            ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
+        ) 
+        THEN 4
+        ELSE 0
+    END
  AS alpha001_argmax,
         
         -- Alpha002 相关计算
@@ -67,9 +62,8 @@ intermediate_calcs AS (
         PARTITION BY timestamp
         ORDER BY 
     CASE 
-        WHEN open = 0 OR open IS NULL THEN NULL
-        WHEN ABS(open) < 1e-10 THEN NULL
-        ELSE close - open / open
+        WHEN open != 0 THEN (close - open) / (open)
+        ELSE NULL
     END
 
     )
@@ -152,7 +146,6 @@ intermediate_calcs AS (
         
         -- Alpha015 相关计算
         
-    -- 使用DuckDB的CORR窗口函数
     CORR(high_rank, volume_rank) OVER (
         PARTITION BY symbol 
         ORDER BY timestamp
@@ -174,9 +167,8 @@ intermediate_calcs AS (
         PARTITION BY symbol
         ORDER BY 
     CASE 
-        WHEN adv20 = 0 OR adv20 IS NULL THEN NULL
-        WHEN ABS(adv20) < 1e-10 THEN NULL
-        ELSE volume / adv20
+        WHEN adv20 != 0 THEN (volume) / (adv20)
+        ELSE NULL
     END
 
         ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
@@ -195,7 +187,6 @@ intermediate_calcs AS (
  AS alpha018_stddev,
         close - open AS alpha018_close_open_diff,
         
-    -- 使用DuckDB的CORR窗口函数
     CORR(close, open) OVER (
         PARTITION BY symbol 
         ORDER BY timestamp
@@ -231,7 +222,6 @@ alpha_factors AS (
         
         -- Alpha 002: (-1 * correlation(rank(delta(log(volume), 2)), rank(((close - open) / open)), 6))
         -1 * 
-    -- 使用DuckDB的CORR窗口函数
     CORR(alpha002_rank_delta_log_vol, alpha002_rank_ret) OVER (
         PARTITION BY symbol 
         ORDER BY timestamp
