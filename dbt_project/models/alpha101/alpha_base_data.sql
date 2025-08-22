@@ -110,7 +110,7 @@ enhanced_data AS (
         {{ ts_cov('high', 'volume', 5) }} AS cov_high_volume_5
         
     FROM base_ohlc
-    WHERE timestamp >= '{{ var("start_date") }}' - INTERVAL '250 days'  -- 扩展时间范围以确保有足够的历史数据
+    WHERE timestamp >= CAST('{{ var("start_date") }}' AS DATE) - INTERVAL '250 days'  -- 扩展时间范围以确保有足够的历史数据
 ),
 
 -- 过滤回原始时间范围

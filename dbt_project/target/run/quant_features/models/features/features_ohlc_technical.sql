@@ -1,7 +1,16 @@
-{{ config(materialized='table') }}
+
+  
+    
+    
+
+    create  table
+      "quant_features"."main"."features_ohlc_technical__dbt_tmp"
+  
+    as (
+      
 
 with technical_data as (
-    select * from {{ ref('mart_technical_indicators') }}
+    select * from "quant_features"."main"."mart_technical_indicators"
 ),
 
 feature_engineering as (
@@ -78,7 +87,10 @@ feature_engineering as (
         
     from technical_data
     -- 移除时间过滤，使用所有可用数据
-    -- where timestamp >= current_date - interval '{{ var("lookback_days") }}' days
+    -- where timestamp >= current_date - interval '20' days
 )
 
 select * from feature_engineering
+    );
+  
+  
