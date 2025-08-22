@@ -1,0 +1,93 @@
+# 增强版回测配置文件
+
+# 基础配置
+backtest:
+  initial_capital: 100000.0
+  commission_rate: 0.001
+  slippage_rate: 0.0005
+  position_size: 0.1  # 每次交易使用的资金比例
+  max_position_size: 0.5  # 最大持仓比例
+  min_confidence: 0.3  # 最小信号置信度
+
+# 风控配置
+risk_management:
+  stop_loss_pct: 0.05  # 止损比例 5%
+  take_profit_pct: 0.1  # 止盈比例 10%
+  max_daily_trades: 10  # 每日最大交易次数
+  max_position_per_pair: 0.2  # 单个交易对最大持仓比例
+
+# Feast配置
+feast:
+  repo_path: "/workspace/feast_config/feature_repo"
+  offline_store:
+    type: "duckdb"
+    path: "/workspace/data/quant_features.duckdb"
+  features:
+    - "technical_indicators:price"
+    - "technical_indicators:ma_5"
+    - "technical_indicators:ma_10" 
+    - "technical_indicators:ma_20"
+    - "technical_indicators:rsi_14"
+    - "technical_indicators:volatility_20d"
+    - "technical_indicators:volume_ratio"
+    - "technical_indicators:momentum_5d"
+    - "technical_indicators:momentum_10d"
+    - "technical_indicators:bb_position"
+    - "technical_indicators:price_above_ma5"
+    - "technical_indicators:price_above_ma10"
+    - "technical_indicators:rsi_overbought"
+    - "technical_indicators:rsi_oversold"
+
+# RuleGo配置
+rulego:
+  endpoint: "http://localhost:8080"
+  rules_chain_id: "trading_strategy_chain"
+  timeout: 30
+  use_mock: false  # 是否使用模拟模式
+  
+# 交易对配置
+trading_pairs:
+  default:
+    - "BTCUSDT"
+    - "ETHUSDT"
+    - "ADAUSDT"
+    - "DOTUSDT"
+  crypto_majors:
+    - "BTCUSDT"
+    - "ETHUSDT"
+    - "BNBUSDT"
+    - "XRPUSDT"
+    - "ADAUSDT"
+    - "SOLUSDT"
+  crypto_defi:
+    - "UNIUSDT"
+    - "AAVEUSDT"
+    - "COMPUSDT"
+    - "SUSHIUSDT"
+
+# 回测时间配置
+time_periods:
+  last_week:
+    days: 7
+  last_month:
+    days: 30
+  last_quarter:
+    days: 90
+  last_year:
+    days: 365
+  custom:
+    start_date: "2024-01-01"
+    end_date: "2024-12-31"
+
+# 输出配置
+output:
+  results_dir: "/workspace/backtest_results"
+  save_detailed_logs: true
+  save_equity_curve: true
+  save_signal_history: true
+  
+# 性能配置
+performance:
+  batch_size: 1000  # 批处理大小
+  parallel_processing: false  # 是否启用并行处理
+  cache_features: true  # 是否缓存特征数据
